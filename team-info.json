@@ -8,6 +8,13 @@
             "email": "gregort@gmx.at",
             "github_user": "g-tikautz"
         },
+        {
+            "student_id": "k12403860",
+            "first_name": "Romeo",
+            "last_name": "Bhuiyan",
+            "email": "bhuiyanromeo28@gmail.com",
+            "github_user": "romeobhuiyan"
+        },
         // ...add a record for each student
     ]
 }
