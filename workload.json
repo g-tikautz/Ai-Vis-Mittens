@@ -1,9 +1,9 @@
 {
-    "team_name": "Team Name",
+    "team_name": "Mittens",
     "students": [
         {
-            "first_name": "First",
-            "last_name": "Last",
+            "first_name": "Gregor",
+            "last_name": "Tikautz",
             "workload": 0.25
         },
         // ...add a record for each student
