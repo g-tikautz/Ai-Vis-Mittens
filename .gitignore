@@ -1,2 +1,8 @@
 non-ai-phase1/maia2_models/
 non-ai-phase1/data/
+.venv/
+ai-phase1/data/
+maia2_models/
+.DS_Store
+.ipynb_checkpoints/
+__pycache__/
