@@ -4,8 +4,8 @@
 
 | First name | Last name | Student ID |
 |---|---|---|
-| Pavao | Kipson | TODO |
-| Gergely | Terenyi | TODO |
+| Pavao | Kipson | k12337106 |
+| Gergely | Terenyi | k12557665 |
 
 Team: Mittens. Model: Maia-2. Question: when and why does Maia-2 fail to predict the human move?
 
