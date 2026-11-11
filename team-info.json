@@ -15,6 +15,19 @@
             "email": "bhuiyanromeo28@gmail.com",
             "github_user": "romeobhuiyan"
         },
-        // ...add a record for each student
+        {
+            "student_id": "k12337106",
+            "first_name": "Pavao",
+            "last_name": "Kipson",
+            "email": "bhuiyanromeo28@gmail.com",
+            "github_user": "Pavao-Kipson"
+        },
+        {
+            "student_id": "k12557665",
+            "first_name": "Gergely",
+            "last_name": "Terenyi",
+            "email": "bhuiyanromeo28@gmail.com",
+            "github_user": "TG000"
+        }
     ]
 }
