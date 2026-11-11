@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mittens: Phase I update</title>
+<style>
+  :root {
+    --bg: #f6f4ef; --ink: #1d2330; --muted: #5d6675; --line: #d9d5cb;
+    --blue: #2a78d6; --red: #c0392b; --amber: #e39a3c; --green: #2f8f78; --card: #ffffff;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: #14171d; overflow: hidden;
+    font-family: "Segoe UI", system-ui, -apple-system, Helvetica, Arial, sans-serif; color: var(--ink); }
+  #stage { position: absolute; left: 50%; top: 50%; width: 1600px; height: 900px;
+    transform-origin: center center; background: var(--bg); }
+  section { position: absolute; inset: 0; padding: 64px 80px 70px; display: none; flex-direction: column; }
+  section.on { display: flex; }
+  .kicker { font-size: 20px; letter-spacing: .12em; text-transform: uppercase; color: var(--blue); font-weight: 600; margin-bottom: 10px; }
+  h1 { font-size: 68px; line-height: 1.08; margin: 0 0 24px; font-weight: 700; letter-spacing: -.01em; text-wrap: balance; }
+  h2 { font-size: 46px; line-height: 1.12; margin: 0 0 28px; font-weight: 700; text-wrap: balance; }
+  p, li { font-size: 27px; line-height: 1.4; }
+  ul { margin: 0; padding-left: 1.1em; } li { margin-bottom: 12px; }
+  .muted { color: var(--muted); }
+  .row { display: flex; gap: 44px; flex: 1; min-height: 0; align-items: stretch; }
+  .col { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; }
+  .fig { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 14px;
+    display: flex; align-items: center; justify-content: center; min-height: 0; }
+  .fig { overflow: hidden; }
+  .fig img { width: 100%; height: 100%; min-height: 0; object-fit: contain; display: block; }
+  .stats { display: flex; gap: 28px; margin-top: 8px; }
+  .stat { flex: 1; background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 22px 26px; }
+  .stat b { display: block; font-size: 62px; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.05; }
+  .stat span { font-size: 22px; color: var(--muted); }
+  .bars { display: flex; flex-direction: column; gap: 16px; }
+  .bar { display: grid; grid-template-columns: 330px 1fr 90px; align-items: center; gap: 16px; font-size: 25px; }
+  .bar i { display: block; height: 38px; border-radius: 4px; background: var(--blue); }
+  .bar em { font-style: normal; font-weight: 700; font-variant-numeric: tabular-nums; text-align: right; }
+  table { border-collapse: collapse; font-size: 25px; width: 100%; }
+  th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+  th { color: var(--muted); font-weight: 600; font-size: 21px; }
+  td.n { text-align: right; font-variant-numeric: tabular-nums; }
+  .tag { align-self: flex-start; display: inline-block; font-size: 20px; font-weight: 600; padding: 4px 12px; border-radius: 999px; margin-bottom: 14px; }
+  .tag.h { background: #e3ecf8; color: #1b4f93; } .tag.a { background: #f6e6d2; color: #8a5312; }
+  .foot { position: absolute; left: 80px; right: 80px; bottom: 26px; display: flex; justify-content: space-between; font-size: 18px; color: var(--muted); }
+  .note { font-size: 21px; color: var(--muted); margin-top: 14px; }
+  .big { font-size: 34px; line-height: 1.35; }
+</style>
+</head>
+<body>
+<div id="stage">
+
+<section>
+  <div class="col" style="justify-content:center">
+    <div class="kicker">AI and Visualization · Vis4AI · Phase I update</div>
+    <h1>When and why does Maia-2 fail to predict the human move?</h1>
+    <p class="big muted">Team Mittens</p>
+  </div>
+</section>
+
+<section>
+  <div class="kicker">Problem</div>
+  <h2>A model that predicts humans, not the best move</h2>
+  <div class="row">
+    <div class="col">
+      <ul>
+        <li><b>Maia-2</b> gets one board and two Elo labels, and returns a probability for every legal move.</li>
+        <li><b>Data:</b> Lichess, June 2024. 10,000 rated blitz and rapid games, 676,579 positions.</li>
+        <li><b>Black box:</b> we only look at inputs and outputs.</li>
+        <li>It matches the human move half the time. What happens in the other half?</li>
+      </ul>
+    </div>
+    <div class="col" style="flex:.8">
+      <div class="stats" style="flex-direction:column">
+        <div class="stat"><b>49.8 %</b><span>top-1: Maia's first choice is the human move</span></div>
+        <div class="stat"><b>78.0 %</b><span>top-3</span></div>
+        <div class="stat"><b>87.8 %</b><span>top-5</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <span class="tag h">Human-only pair</span>
+  <h2>Failures depend on the phase, hardly on the clock</h2>
+  <div class="row">
+    <div class="fig" style="flex:1.25"><img src="../non-ai-phase1/maia2_square_diff_failures.png" alt="Per-square difference between human and Maia-2 destination squares in failed predictions"></div>
+    <div class="col" style="flex:.75">
+      <ul>
+        <li>Failure rate: opening <b>55 %</b>, middlegame 49 %, endgame 45 %.</li>
+        <li>Under 30 s on the clock: 47 %. Over a minute: 48 %.</li>
+        <li>Opening: Maia sends pieces to <b>f3</b>, humans push pawns to c4, d4, e4, f4.</li>
+      </ul>
+      <p class="note">Red: humans move there more often. Blue: Maia-2 predicts it more often. Percentage points of failed predictions.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <span class="tag h">Human-only pair</span>
+  <h2>The most common opening failure: Nf3 instead of a pawn move</h2>
+  <div class="row">
+    <div class="col" style="flex:1.2">
+      <table>
+        <tr><th>Maia-2 predicts</th><th>Human plays</th><th style="text-align:right">Cases</th><th style="text-align:right">Maia's P(human move)</th></tr>
+        <tr><td>Nf3</td><td>e4</td><td class="n">6,266</td><td class="n">2.5 %</td></tr>
+        <tr><td>Nf3</td><td>d4</td><td class="n">3,095</td><td class="n">6.2 %</td></tr>
+        <tr><td>Nf6</td><td>e5</td><td class="n">2,971</td><td class="n">4.5 %</td></tr>
+        <tr><td>Nf6</td><td>d5</td><td class="n">2,020</td><td class="n">8.0 %</td></tr>
+        <tr><td>Nf6</td><td>c5</td><td class="n">1,624</td><td class="n">1.3 %</td></tr>
+      </table>
+      <p class="note">Top five (Maia move, human move) pairs among 132,841 opening failures.</p>
+    </div>
+    <div class="col" style="flex:.8">
+      <ul>
+        <li>Maia-2 develops a knight where humans claim the centre with a pawn.</li>
+        <li>First moves alone fail <b>95 %</b> of the time.</li>
+        <li class="muted">Still to verify: model behaviour or an input issue?</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section>
+  <span class="tag a">AI-aided pair</span>
+  <h2>Not every failure is the same: most misses are close</h2>
+  <div class="fig" style="flex:1"><img src="../ai-phase1/figures/fail_types_overview.png" alt="Stacked bars of prediction outcome by game phase, player Elo and clock left"></div>
+  <div class="stats">
+    <div class="stat"><b>28.3 %</b><span>near miss: human move ranked 2 or 3</span></div>
+    <div class="stat"><b>19.0 %</b><span>far miss: the extra opening failures are these</span></div>
+    <div class="stat"><b style="color:var(--red)">2.9 %</b><span>confident miss: Maia ≥ 60 % sure, human move outside top 3</span></div>
+  </div>
+</section>
+
+<section>
+  <span class="tag a">AI-aided pair</span>
+  <h2>Maia-2 models normal play better than human error</h2>
+  <div class="row">
+    <div class="fig" style="flex:1"><img src="../ai-phase1/figures/failure_by_move_quality.png" alt="Heatmap of failure rate by human move quality and Elo"></div>
+    <div class="col" style="flex:1">
+      <div class="fig" style="flex:1; margin-bottom:18px"><img src="../ai-phase1/figures/calibration_elo.png" alt="Reliability diagram overall and per Elo group"></div>
+      <ul>
+        <li>Fails on <b>44 %</b> of good moves, <b>77 %</b> of blunders.</li>
+        <li>Slightly overconfident in every Elo group (ECE 0.04 to 0.05).</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section>
+  <span class="tag a">AI-aided pair</span>
+  <h2>Is a miss an error? Only 17 % of misses are Maia's mistake</h2>
+  <div class="row">
+    <div class="col" style="flex:1.3">
+      <div class="bars">
+        <div class="bar"><span>Equally good alternative</span><i style="width:100%; background:#9aa3b0"></i><em>40 %</em></div>
+        <div class="bar"><span>Human error, Maia sound</span><i style="width:61%; background:var(--amber)"></i><em>25 %</em></div>
+        <div class="bar"><span>Both inaccurate</span><i style="width:46%; background:#c9b9a0"></i><em>18 %</em></div>
+        <div class="bar"><span>Maia error, human sound</span><i style="width:42%; background:var(--red)"></i><em>17 %</em></div>
+      </div>
+      <p class="note">Share of misses. Stockfish depth 12 on 24,000 sampled positions, tolerance 0.05 win chance. Real Maia errors stay between 12 % and 18 % for tolerances from 0.025 to 0.1.</p>
+    </div>
+    <div class="col" style="flex:.7">
+      <ul>
+        <li>Top-1 accuracy punishes Maia for moves that are just as good.</li>
+        <li>In a quarter of misses Maia is "wrong" because the human blundered.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section>
+  <span class="tag a">AI-aided pair</span>
+  <h2>What Maia-2 cannot see: clock and history</h2>
+  <div class="row">
+    <div class="col">
+      <p class="muted" style="margin:0 0 14px">Failure rate, recapture versus other moves</p>
+      <div class="bars">
+        <div class="bar" style="grid-template-columns:260px 1fr 90px"><span>Opening, other</span><i style="width:100%"></i><em>59 %</em></div>
+        <div class="bar" style="grid-template-columns:260px 1fr 90px"><span>Opening, recapture</span><i style="width:23%; background:var(--green)"></i><em>14 %</em></div>
+        <div class="bar" style="grid-template-columns:260px 1fr 90px"><span>Middlegame, other</span><i style="width:90%"></i><em>53 %</em></div>
+        <div class="bar" style="grid-template-columns:260px 1fr 90px"><span>Middlegame, recapture</span><i style="width:26%; background:var(--green)"></i><em>15 %</em></div>
+        <div class="bar" style="grid-template-columns:260px 1fr 90px"><span>Endgame, other</span><i style="width:79%"></i><em>47 %</em></div>
+        <div class="bar" style="grid-template-columns:260px 1fr 90px"><span>Endgame, recapture</span><i style="width:16%; background:var(--green)"></i><em>9 %</em></div>
+      </div>
+    </div>
+    <div class="col">
+      <ul>
+        <li>Forced-looking moves are easy. Free choices are where it fails.</li>
+        <li>Maia's uncertainty follows human think-time only weakly (Spearman below 0.3).</li>
+        <li><b>Style bias</b> over all positions: +8.9 points knight moves and −10.3 points pawn moves in the opening. Captures over-predicted in every phase.</li>
+        <li>Failure is predictable from the situation alone: AUC 0.70.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section>
+  <span class="tag a">AI-aided pair</span>
+  <h2>Live: the failure atlas dashboard</h2>
+  <div class="row">
+    <div class="col">
+      <ul>
+        <li><b>Failure atlas:</b> slices of conditions with failure rate. Click a block for real boards and a dossier.</li>
+        <li><b>Anatomy of a failure:</b> the Stockfish split by phase and Elo.</li>
+        <li><b>Input space:</b> where positions lie and where Maia fails.</li>
+      </ul>
+      <p class="note">ai-phase1/ai_phase1_out/maia2_failure_atlas.html</p>
+    </div>
+    <div class="col" style="flex:.8">
+      <table>
+        <tr><th>Slice</th><th style="text-align:right">Failure</th></tr>
+        <tr><td>First moves of the game</td><td class="n">95 %</td></tr>
+        <tr><td>Book position, early</td><td class="n">63 %</td></tr>
+        <tr><td>All positions</td><td class="n">50 %</td></tr>
+        <tr><td>In check, few legal moves</td><td class="n">30 %</td></tr>
+        <tr><td>Fast recapture</td><td class="n">8 %</td></tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="kicker">Summary</div>
+  <h2>What we know after Phase I, and what comes next</h2>
+  <div class="row">
+    <div class="col">
+      <ul>
+        <li>Half of all predictions miss, but most misses are near misses or equally good moves.</li>
+        <li>Real failures concentrate in the opening and on human mistakes.</li>
+        <li>Maia-2 prefers knights and captures more than humans do.</li>
+      </ul>
+    </div>
+    <div class="col">
+      <ul>
+        <li><b>GenAI:</b> wider and more careful analysis, fast. Its code had silent bugs, and it produced results faster than we could verify them.</li>
+        <li><b>Phase II:</b> look inside. Why Nf3 on move one? What does the Elo input change? What happens in confident misses?</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<div class="foot"><span>Mittens · Vis4AI Phase I</span><span id="pg"></span></div>
+</div>
+
+<script>
+  const stage = document.getElementById('stage');
+  const slides = [...document.querySelectorAll('section')];
+  let i = Math.max(0, Math.min(slides.length - 1, (parseInt(location.hash.slice(1)) || 1) - 1));
+  function show() {
+    slides.forEach((s, k) => s.classList.toggle('on', k === i));
+    document.getElementById('pg').textContent = (i + 1) + ' / ' + slides.length;
+    history.replaceState(null, '', '#' + (i + 1));
+  }
+  function fit() {
+    const k = Math.min(innerWidth / 1600, innerHeight / 900);
+    stage.style.transform = 'translate(-50%, -50%) scale(' + k + ')';
+  }
+  function go(d) { i = Math.max(0, Math.min(slides.length - 1, i + d)); show(); }
+  addEventListener('keydown', e => {
+    if (['ArrowRight', 'PageDown', ' ', 'Enter'].includes(e.key)) { e.preventDefault(); go(1); }
+    if (['ArrowLeft', 'PageUp', 'Backspace'].includes(e.key)) { e.preventDefault(); go(-1); }
+    if (e.key === 'f') document.documentElement.requestFullscreen();
+  });
+  addEventListener('click', e => go(e.clientX < innerWidth / 3 ? -1 : 1));
+  addEventListener('resize', fit);
+  fit(); show();
+</script>
+</body>
+</html>
